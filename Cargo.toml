@@ -9,3 +9,4 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 serenity = "0.5.13"
+rand = "0.7.3"
