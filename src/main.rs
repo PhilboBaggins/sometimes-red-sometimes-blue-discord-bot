@@ -18,8 +18,8 @@ pub fn main() {
         .expect("Error creating client");
 
     client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix("~")) // set the bot's prefix to "~"
-        .cmd("ping", ping));
+        .configure(|c| c.prefix("")) // set the bot's prefix to "~"
+        .cmd("?", red_or_blue));
 
     // start listening for events by starting a single shard
     if let Err(why) = client.start() {
