@@ -16,7 +16,7 @@ impl EventHandler for Handler {
     }
 
     fn message(&self, _ctx: Context, msg: Message) {
-        if msg.mentions_user_id(MY_CLIENT_ID) {
+        if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(MY_CLIENT_ID)) {
             let choices = ["red", "blue"];
             let mut rng = thread_rng();
             let choice = choices.choose(&mut rng).unwrap();
