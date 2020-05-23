@@ -2,7 +2,11 @@
 
 use serenity::client::{Client, EventHandler};
 use serenity::framework::standard::StandardFramework;
+
 use std::env;
+
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 
 struct Handler;
 
@@ -23,6 +27,9 @@ pub fn main() {
     }
 }
 
-command!(ping(_context, message) {
-    let _ = message.reply("Pong!");
+command!(red_or_blue(_context, message) {
+    let choices = ["red", "blue"];
+    let mut rng = thread_rng();
+    let choice = choices.choose(&mut rng).unwrap();
+    let _ = message.reply(choice);
 });
