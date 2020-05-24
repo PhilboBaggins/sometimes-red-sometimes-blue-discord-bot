@@ -8,6 +8,7 @@ use serenity::{
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+use std::env;
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
