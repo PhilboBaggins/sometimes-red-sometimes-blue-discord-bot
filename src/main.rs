@@ -1,6 +1,6 @@
 use serenity::{
     builder::CreateMessage,
-    model::{channel::Message, gateway::Ready},
+    model::{channel::Message, gateway::Ready, id::UserId},
     prelude::*,
     utils::Colour,
 };
@@ -9,11 +9,12 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use std::fmt;
+use std::sync::{Arc, Mutex};
 
-// TODO: Don't hard-code this, read it dynamicially ... perhaps with serenity::http::raw::get_current_user()
-const MY_CLIENT_ID: u64 = 713872191682510909;
-
-struct Handler;
+#[derive(Default)]
+struct Handler {
+    my_id: Arc<Mutex<UserId>>,
+}
 
 // TODO: Consider using rand_derive
 enum Colours {
@@ -49,10 +50,15 @@ fn gen_colour_message(message: CreateMessage) -> CreateMessage {
 impl EventHandler for Handler {
     fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+
+        // Save my user ID so I can check if received messages are mentioning me
+        let mut my_id = self.my_id.lock().unwrap();
+        *my_id = ready.user.id;
     }
 
     fn message(&self, _ctx: Context, msg: Message) {
-        if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(MY_CLIENT_ID)) {
+        if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
+        {
             if let Err(why) = msg.channel_id.send_message(gen_colour_message) {
                 println!("Error sending message: {:?}", why);
             }
@@ -61,8 +67,10 @@ impl EventHandler for Handler {
 }
 
 pub fn main() {
+    let handler: Handler = Default::default();
+
     // Login with a bot token from the environment
-    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("token"), Handler)
+    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("token"), handler)
         .expect("Error creating client");
 
     // Start listening for events by starting a single shard
