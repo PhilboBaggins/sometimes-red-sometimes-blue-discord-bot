@@ -18,14 +18,16 @@ enum Colours {
     Blue
 }
 
-impl Colours {
-    fn to_string(&self) -> &'static str {
+impl fmt::Display for Colours {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Colours::Red => "Red",
-            Colours::Blue => "Blue",
+            Colours::Red => write!(f, "{}","Red"),
+            Colours::Blue => write!(f, "{}", "Blue"),
         }
     }
+}
 
+impl Colours {
     fn to_colour(&self) -> Colour {
         match self {
             Colours::Red => Colour::from_rgb(255, 0, 0),
@@ -39,9 +41,9 @@ fn gen_colour_message(message: CreateMessage) -> CreateMessage {
     let mut rng = thread_rng();
     let choice = choices.choose(&mut rng).unwrap();
     message
-        //.content(choice.to_string())
+        //.content(choice)
         .embed(|e| e
-            .title(choice.to_string())
+            .title(choice)
             .colour(choice.to_colour()))
 }
 
