@@ -49,14 +49,15 @@ impl EventHandler for Handler {
         *my_id = ready.user.id;
     }
 
-    fn message(&self, _ctx: Context, msg: Message) {
-        if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
+    fn message(&self, ctx: Context, msg: Message) {
+        if !msg.is_own(ctx.cache) && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
         {
-            let ret = msg.channel_id.send_message(|message| {
+            let ret = msg.channel_id.send_message(&ctx.http, |message| {
                 let choices = [Colours::Red, Colours::Blue];
                 let mut rng = thread_rng();
                 let choice = choices.choose(&mut rng).unwrap();
-                message.embed(|e| e.title(choice).colour(choice.to_colour()))
+                message.embed(|e| e.title(choice).colour(choice.to_colour()));
+                message
             });
             if let Err(why) = ret {
                 eprintln!("Error sending message: {:?}", why);

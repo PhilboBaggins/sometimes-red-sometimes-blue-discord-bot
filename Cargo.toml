@@ -10,5 +10,5 @@ repository = "https://github.com/PhilboBaggins/sometimes-red-sometimes-blue-disc
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serenity = "0.5.13"
+serenity = "0.8.6"
 rand = "0.7.3"
