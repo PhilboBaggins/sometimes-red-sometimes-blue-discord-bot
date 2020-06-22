@@ -1,5 +1,4 @@
 use serenity::{
-    builder::CreateMessage,
     model::{channel::Message, gateway::Ready, id::UserId},
     prelude::*,
     utils::Colour,
@@ -41,13 +40,6 @@ impl Colours {
     }
 }
 
-fn gen_colour_message(message: CreateMessage) -> CreateMessage {
-    let choices = [Colours::Red, Colours::Blue];
-    let mut rng = thread_rng();
-    let choice = choices.choose(&mut rng).unwrap();
-    message.embed(|e| e.title(choice).colour(choice.to_colour()))
-}
-
 impl EventHandler for Handler {
     fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
@@ -60,7 +52,13 @@ impl EventHandler for Handler {
     fn message(&self, _ctx: Context, msg: Message) {
         if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
         {
-            if let Err(why) = msg.channel_id.send_message(gen_colour_message) {
+            let ret = msg.channel_id.send_message(|message| {
+                let choices = [Colours::Red, Colours::Blue];
+                let mut rng = thread_rng();
+                let choice = choices.choose(&mut rng).unwrap();
+                message.embed(|e| e.title(choice).colour(choice.to_colour()))
+            });
+            if let Err(why) = ret {
                 eprintln!("Error sending message: {:?}", why);
             }
         }
