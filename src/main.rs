@@ -61,7 +61,7 @@ impl EventHandler for Handler {
         if !msg.is_own() && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
         {
             if let Err(why) = msg.channel_id.send_message(gen_colour_message) {
-                println!("Error sending message: {:?}", why);
+                eprintln!("Error sending message: {:?}", why);
             }
         }
     }
@@ -76,6 +76,6 @@ pub fn main() {
 
     // Start listening for events by starting a single shard
     if let Err(why) = client.start() {
-        println!("An error occurred while running the client: {:?}", why);
+        eprintln!("An error occurred while running the client: {:?}", why);
     }
 }
