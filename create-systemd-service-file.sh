@@ -1,15 +1,11 @@
 #!/bin/sh
 
 SYSTEMD_FILE="sometimes-red-sometimes-blue-discord-bot.service"
+USER="nobody"
 
-if [ $# -gt 2 ]; then
+if [ $# -gt 1 ]; then
     DISCORD_TOKEN="$1"
     EXECUTABLE_PATH="$2"
-    USER="$3"
-elif [ $# -gt 1 ]; then
-    DISCORD_TOKEN="$1"
-    EXECUTABLE_PATH="$2"
-    USER="$(id -un)"
 else
     echo "$(basename -- "$0") discord-token executable-path [user]" >&2
     exit 1
