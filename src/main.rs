@@ -1,4 +1,5 @@
 use serenity::{
+    async_trait,
     model::{channel::Message, gateway::Ready, id::UserId},
     prelude::*,
     utils::Colour,
@@ -40,8 +41,9 @@ impl Colours {
     }
 }
 
+#[async_trait]
 impl EventHandler for Handler {
-    fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
         // Save my user ID so I can check if received messages are mentioning me
@@ -49,7 +51,7 @@ impl EventHandler for Handler {
         *my_id = ready.user.id;
     }
 
-    fn message(&self, ctx: Context, msg: Message) {
+    async fn message(&self, ctx: Context, msg: Message) {
         if !msg.is_own(ctx.cache) && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
         {
             let ret = msg.channel_id.send_message(&ctx.http, |message| {
@@ -59,22 +61,36 @@ impl EventHandler for Handler {
                 message.embed(|e| e.title(choice).colour(choice.to_colour()));
                 message
             });
-            if let Err(why) = ret {
+            if let Err(why) = ret.await {
                 eprintln!("Error sending message: {:?}", why);
             }
         }
     }
 }
 
-pub fn main() {
+#[tokio::main]
+async fn main() {
     let handler: Handler = Default::default();
 
-    // Login with a bot token from the environment
-    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("token"), handler)
-        .expect("Error creating client");
+    // Configure the client with your Discord bot token in the environment.
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    // Start listening for events by starting a single shard
-    if let Err(why) = client.start() {
+    // Set gateway intents, which decides what events the bot will be notified about
+    let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::DIRECT_MESSAGES;
+
+    // Create a new instance of the Client, logging in as a bot. This will
+    // automatically prepend your bot token with "Bot ", which is a requirement
+    // by Discord for bot users.
+    let mut client = Client::builder(&token, intents)
+        .event_handler(handler)
+        .await
+        .expect("An error occurred while while creating the client");
+
+    // Finally, start a single shard, and start listening to events.
+    //
+    // Shards will automatically attempt to reconnect, and will perform
+    // exponential backoff until it reconnects.
+    if let Err(why) = client.start().await {
         eprintln!("An error occurred while running the client: {:?}", why);
     }
 }
