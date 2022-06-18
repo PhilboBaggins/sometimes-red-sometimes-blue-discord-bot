@@ -52,7 +52,8 @@ impl EventHandler for Handler {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
-        if !msg.is_own(ctx.cache) && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
+        if !msg.is_own(ctx.cache)
+            && (msg.is_private() || msg.mentions_user_id(*self.my_id.lock().unwrap()))
         {
             let ret = msg.channel_id.send_message(&ctx.http, |message| {
                 let choices = [Colours::Red, Colours::Blue];
