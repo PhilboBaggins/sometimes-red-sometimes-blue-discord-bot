@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready, id::UserId},
